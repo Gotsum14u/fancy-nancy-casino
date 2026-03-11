@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fancy Nancy Casino</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #transaction-log {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            width: 300px;
+            max-height: 90%;
+            overflow-y: auto;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="transaction-log"></div>
+    <script>
+        // Variables
+        let balance = parseFloat(localStorage.getItem('balance')) || 1000;
+        const transactionLog = document.getElementById('transaction-log');
+
+        // Initialize WebGL background
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Add a simple cube
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+        camera.position.z = 5;
+
+        // Voice announcer
+        const synth = window.speechSynthesis;
+
+        function speak(text) {
+            if (synth.speaking) {
+                console.error('speech synthesis in progress');
+                return;
+            }
+            const utterance = new SpeechSynthesisUtterance(text);
+            synth.speak(utterance);
+        }
+
+        // Functions for games
+        function playGame(game) {
+            // implement game logic here
+            speak(`Welcome to ${game}!`);
+            logTransaction(`Played ${game}: Bet - $10`);
+        }
+
+        function logTransaction(message) {
+            transactionLog.innerHTML += `<p>${message}</p>`;
+            localStorage.setItem('transactionLog', transactionLog.innerHTML);
+        }
+
+        // Manage balance
+        function updateBalance(amount) {
+            balance += amount;
+            localStorage.setItem('balance', balance);
+            logTransaction(`Balance updated: $${balance}`);
+        }
+
+        // Game examples
+        const games = ['Crash', 'Slots', 'Roulette', 'Blackjack', 'Poker'];
+        games.forEach(game => { 
+            playGame(game);
+        });
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
